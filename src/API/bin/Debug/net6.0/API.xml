@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>API</name>
+    </assembly>
+    <members>
+        <member name="M:API.Controllers.HeroiController.ObterAsync">
+            <summary>
+            Obter.
+            </summary>
+            <remarks>Obter lista de heróis</remarks>
+        </member>
+        <member name="M:API.Controllers.HeroiController.AdicionarAsync">
+            <summary>
+            Adicionar.
+            </summary>
+            <remarks>Adicionar heróri</remarks>
+        </member>
+        <member name="M:API.Controllers.HeroiController.EditarAsync">
+            <summary>
+            Alterar.
+            </summary>
+            <remarks>Alterar herói</remarks>
+        </member>
+        <member name="M:API.Controllers.HeroiController.DeletarAsync(System.Int64)">
+            <summary>
+            Deletar.
+            </summary>
+            <remarks>Deletar herói</remarks>
+        </member>
+    </members>
+</doc>
