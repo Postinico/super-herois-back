@@ -7,13 +7,11 @@ namespace API.ViewModels
         public SuperpoderViewModel
         (
             int id,
-            string superPoder,
-            string descricao
+            string superPoder
         )
         {
             Id = id;
             SuperPoder = superPoder;
-            Descricao = descricao;
         }
 
         [JsonPropertyName("id")]
@@ -21,8 +19,5 @@ namespace API.ViewModels
 
         [JsonPropertyName("superPoder")]
         public string SuperPoder { get; private set; }
-
-        [JsonPropertyName("Descricao")]
-        public string Descricao { get; private set; }
     }
 }

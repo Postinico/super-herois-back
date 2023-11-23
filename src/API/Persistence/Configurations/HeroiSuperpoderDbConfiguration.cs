@@ -10,8 +10,7 @@ namespace API.Persistence.Configurations
         {
             builder.ToTable("HeroisSuperpoderes");
 
-            builder.HasKey(u => u.HeroiId);
-            builder.HasKey(u => u.SuperpoderId);
+            builder.HasKey(s => new { s.HeroiId, s.SuperpoderId });
 
             builder.Property(u => u.HeroiId)
                    .IsRequired()

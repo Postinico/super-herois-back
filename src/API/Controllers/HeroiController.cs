@@ -39,28 +39,26 @@ namespace API.Controllers
         [ProducesResponseType((int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public IActionResult ObterId(int id)
+        public async Task<IActionResult> ObterIdAsync(int id)
         {
             var heroi = _dbContext.Heroi.SingleOrDefault(c => c.Id == id);
-
             if (heroi == null)
             {
-                var ResultViewModel = new ResultViewModel(false, "Herói não localizado.", null);
-                return NotFound(ResultViewModel);
+                var resultViewModel = new ResultViewModel(false, "Herói não localizado.", null);
+
+                await Task.CompletedTask;
+                return NotFound(resultViewModel);
             }
             else
             {
-                var heroiViewModel = new HeroiViewModel
-                    (
-                        heroi.Id,
-                        heroi.Nome,
-                        heroi.NomeHeroi,
-                        heroi.DataNascimento,
-                        heroi.Altura,
-                        heroi.Peso
-                    );
+                var superpoderes = await ObterHeroiSuperPoderesAsync(id);
 
-                return Ok(heroiViewModel);
+                var heroiSuperpoderViewModel = new HeroiSuperpoderViewModel(heroi, superpoderes);
+
+                var resultViewModel = new ResultViewModel(true, "Herói localizado.", heroiSuperpoderViewModel);
+
+                await Task.CompletedTask;
+                return Ok(resultViewModel);
             }
         }
 
@@ -83,7 +81,11 @@ namespace API.Controllers
             }
             else
             {
-                var resultViewModel = new ResultViewModel(true, "Lista de heróis", herois);
+                var heroiViewModel = herois
+                .Select(c => new HeroiViewModel(c.Id, c.NomeHeroi))
+                .ToList();
+
+                var resultViewModel = new ResultViewModel(true, "Lista de heróis", heroiViewModel);
 
                 await Task.CompletedTask;
                 return Ok(resultViewModel);
@@ -127,7 +129,7 @@ namespace API.Controllers
                         var resultViewModel = new ResultViewModel(resultado: true, menssagem: $"Herói {request.NomeHeroi} cadastrado com sucesso", data: request);
 
                         await Task.CompletedTask;
-                        return Created(nameof(ObterId), resultViewModel);
+                        return Created(nameof(ObterIdAsync), resultViewModel);
                     }
                     else
                     {
@@ -186,7 +188,11 @@ namespace API.Controllers
                             request.Peso
                         );
 
-                    _dbContext.SaveChanges();
+                    await _dbContext.SaveChangesAsync();
+
+                    await DeletarHeroiSuperPoderesAsync(id);
+
+                    await AdicionarHeroiSuperPoderesAsync(id, request.Superpoderes);
 
                     await Task.CompletedTask;
                     return Accepted(new ResultViewModel(true, "Herói alterado com sucesso!", heroi));
@@ -224,6 +230,8 @@ namespace API.Controllers
             }
             else
             {
+                await DeletarHeroiSuperPoderesAsync(id);
+
                 _dbContext.Heroi.Remove(heroi);
                 _dbContext.SaveChanges();
 
@@ -260,5 +268,32 @@ namespace API.Controllers
 
             return true;
         }
+        private async Task<List<SuperpoderViewModel>> ObterHeroiSuperPoderesAsync(int heroiId)
+        {
+            var superpoderViewModel = new List<SuperpoderViewModel>();
+
+            var heroiSuperpoderes = _dbContext.HeroiSuperpoder.Where(c => c.HeroiId == heroiId).ToList();
+
+            foreach (var heroiSuperpoder in heroiSuperpoderes)
+            {
+                var Superpoder = _dbContext.Superpoder.FirstOrDefault(c => c.Id == heroiSuperpoder.SuperpoderId);
+
+                superpoderViewModel.Add(new SuperpoderViewModel(Superpoder.Id, Superpoder.SuperPoder));
+            }
+
+            await Task.CompletedTask;
+            return superpoderViewModel;
+        }
+        private async Task<bool> DeletarHeroiSuperPoderesAsync(int heroiId)
+        {
+            var heroiSuperpoderes = _dbContext.HeroiSuperpoder.Where(c => c.HeroiId == heroiId).ToArray();
+
+            _dbContext.HeroiSuperpoder.RemoveRange(heroiSuperpoderes);
+            await _dbContext.SaveChangesAsync();
+
+            return true;
+        }
+
+        //private async Task<>
     }
 }

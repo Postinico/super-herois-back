@@ -39,25 +39,22 @@ namespace API.Controllers
         [ProducesResponseType((int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
-        public IActionResult ObterId(int id)
+        public async Task<IActionResult> ObterIdAsync(int id)
         {
             var superpoder = _dbContext.Superpoder.SingleOrDefault(c => c.Id == id);
-
             if (superpoder == null)
             {
                 var ResultViewModel = new ResultViewModel(false, "Superpoder não localizado.", null);
+
+                await Task.CompletedTask;
                 return NotFound(ResultViewModel);
             }
             else
             {
-                var superpoderViewModel = new SuperpoderViewModel
-                    (
-                        superpoder.Id,
-                        superpoder.SuperPoder,
-                        superpoder.Descricao
-                    );
+                var resultViewModel = new ResultViewModel(true, "Superpoder localizado.", superpoder);
 
-                return Ok(superpoderViewModel);
+                await Task.CompletedTask;
+                return Ok(resultViewModel);
             }
         }
 
@@ -70,8 +67,8 @@ namespace API.Controllers
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ObterAsync()
         {
-            var herois = _dbContext.Superpoder;
-            if (herois.Count() <= 0)
+            var superpoderes = _dbContext.Superpoder;
+            if (superpoderes.Count() <= 0)
             {
                 var ResultViewModel = new ResultViewModel(false, "Não existe Superpoderes cadastrado.", null);
 
@@ -80,7 +77,11 @@ namespace API.Controllers
             }
             else
             {
-                var resultViewModel = new ResultViewModel(true, "Lista de Superpoderes", herois);
+                var superpoderViewModel = superpoderes
+                .Select(c => new SuperpoderViewModel(c.Id, c.SuperPoder))
+                .ToList();
+
+                var resultViewModel = new ResultViewModel(true, "Lista de Superpoderes", superpoderViewModel);
 
                 await Task.CompletedTask;
                 return Ok(resultViewModel);
@@ -116,7 +117,7 @@ namespace API.Controllers
                     var resultViewModel = new ResultViewModel(resultado: true, menssagem: $"Superpoder {request.SuperPoder} cadastrado com sucesso", data: request);
 
                     await Task.CompletedTask;
-                    return Created(nameof(ObterId), resultViewModel);
+                    return Created(nameof(ObterIdAsync), resultViewModel);
                 }
                 else
                 {
