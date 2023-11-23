@@ -34,10 +34,10 @@ namespace API.Controllers
         /// </summary>
         /// <returns>Herói específico</returns>
         /// <remarks>Buscar!</remarks>
-        /// <param name="id" example="1">Album Id</param>
+        /// <param name="id" example="1">Heróis Id</param>
         [HttpGet("{id}")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.InternalServerError)]
         public IActionResult ObterId(int id)
         {
@@ -106,15 +106,8 @@ namespace API.Controllers
                 var heroi = _dbContext.Heroi.SingleOrDefault(c => c.NomeHeroi.ToLower() == request.NomeHeroi.ToLower());
                 if (heroi == null)
                 {
-                    foreach (var poderId in request.Superpoderes)
-                    {
-                        var poder = _dbContext.Superpoder.Find(poderId);
-                        if (poder == null)
-                        {
-                            await Task.CompletedTask;
-                            return BadRequest(new ResultViewModel(resultado: false, menssagem: $"Poder não localizado ID: {poderId}", data: request));
-                        }
-                    }
+                    var result = await ValidarSuperPoderesAsync(request.Superpoderes);
+                    if (!result.Resultado) return BadRequest(result);
 
                     var heroiNovo = new Heroi
                     (
@@ -128,10 +121,18 @@ namespace API.Controllers
                     _dbContext.Heroi.Add(heroiNovo);
                     _dbContext.SaveChanges();
 
-                    var resultViewModel = new ResultViewModel(resultado: true, menssagem: $"Herói {request.NomeHeroi} cadastrado com sucesso", data: request);
+                    var resultAdicionarHeroiSuperPoderesAsync = await AdicionarHeroiSuperPoderesAsync(heroiNovo.Id, request.Superpoderes);
+                    if (resultAdicionarHeroiSuperPoderesAsync)
+                    {
+                        var resultViewModel = new ResultViewModel(resultado: true, menssagem: $"Herói {request.NomeHeroi} cadastrado com sucesso", data: request);
 
-                    await Task.CompletedTask;
-                    return Created(nameof(ObterId), resultViewModel);
+                        await Task.CompletedTask;
+                        return Created(nameof(ObterId), resultViewModel);
+                    }
+                    else
+                    {
+                        return BadRequest(new ResultViewModel(resultado: false, menssagem: $"Herói {request.NomeHeroi} erro ao relacionar herói e superpoderes", data: request));
+                    }
                 }
                 else
                 {
@@ -231,6 +232,33 @@ namespace API.Controllers
                 await Task.CompletedTask;
                 return Ok(resultViewModel);
             }
+        }
+
+
+        private async Task<ResultViewModel> ValidarSuperPoderesAsync(List<int> superpoderes)
+        {
+            foreach (var poderId in superpoderes)
+            {
+                var poder = _dbContext.Superpoder.Find(poderId);
+                if (poder == null)
+                {
+                    await Task.CompletedTask;
+                    return new ResultViewModel(resultado: false, menssagem: $"Poder não localizado ID: {poderId}", superpoderes);
+                }
+            }
+            return new ResultViewModel(resultado: true, menssagem: $"", data: null);
+        }
+        private async Task<bool> AdicionarHeroiSuperPoderesAsync(int heroiId, List<int> superpoderes)
+        {
+            foreach (var poderId in superpoderes)
+            {
+                var heroiSuperpoder = new HeroiSuperpoder(heroiId, poderId);
+
+                await _dbContext.HeroiSuperpoder.AddAsync(heroiSuperpoder);
+                await _dbContext.SaveChangesAsync();
+            }
+
+            return true;
         }
     }
 }

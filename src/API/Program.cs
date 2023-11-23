@@ -12,8 +12,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers();
 
-builder.Services.AddScoped<IValidator<PostHeroiInputModel>, PostHeroiInputModelValidator>();
+
 builder.Services.AddScoped<IValidator<PutHeroiInputModel>, PuttHeroiInputModelValidator>();
+builder.Services.AddScoped<IValidator<PostHeroiInputModel>, PostHeroiInputModelValidator>();
+builder.Services.AddScoped<IValidator<PutSuperpoderInputModel>, PutSuperpoderInputModelValidator>();
+builder.Services.AddScoped<IValidator<PostSuperpoderInputModel>, PostSuperpoderInputModelValidator>();
 
 builder.Services.AddDbContext<Context>(opt => opt.UseInMemoryDatabase("dbHerois"));
 

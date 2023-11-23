@@ -8,14 +8,26 @@ namespace API.Models
     {
         protected Superpoder() { }
 
+        public Superpoder(string superpoder, string descricao)
+        {
+            SuperPoder = superpoder;
+            Descricao = descricao;
+        }
+
         [Key]
         [Column("Id")]
         public int Id { get; set; }
 
         [Column("SuperPoder")]
-        public string SuperPoder { get; set; }
+        public string SuperPoder { get; private set; }
 
         [Column("Descricao")]
-        public string Descricao { get; set; }
+        public string Descricao { get; private set; }
+
+        public void Update(string superPoder, string descricao)
+        {
+            SuperPoder = superPoder;
+            Descricao = descricao;
+        }
     }
 }

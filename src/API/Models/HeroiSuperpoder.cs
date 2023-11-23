@@ -1,16 +1,17 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace API.Models
+﻿namespace API.Models
 {
-    [Table("HeroisSuperpoderes")]
     public class HeroiSuperpoder
     {
         protected HeroiSuperpoder() { }
 
-        [Column("HeroiId")]
-        public int HeroiId { get; set; }
+        public HeroiSuperpoder(int heroiId, int superpoderId)
+        {
+            HeroiId = heroiId;
+            SuperpoderId = superpoderId;
+        }
 
-        [Column("SuperpoderId")]
-        public int SuperpoderId { get; set; }
+        public int HeroiId { get; private set; }
+
+        public int SuperpoderId { get; private set; }
     }
 }
