@@ -1,4 +1,6 @@
+using API.InputModels;
 using API.Persistence;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
@@ -8,11 +10,16 @@ var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+builder.Services.AddScoped<IValidator<PostHeroiInputModel>, PostHeroiInputModelValidator>();
+builder.Services.AddScoped<IValidator<PutHeroiInputModel>, PuttHeroiInputModelValidator>();
 
 builder.Services.AddDbContext<Context>(opt => opt.UseInMemoryDatabase("dbHerois"));
+
+builder.Services.AddRouting(options => options.LowercaseUrls = true);
+
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
