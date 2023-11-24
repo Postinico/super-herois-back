@@ -49,16 +49,29 @@ builder.Services.AddSwaggerGen(c =>
     c.IncludeXmlComments(xmlPath);
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("cors",
+    builder =>
+    {
+        builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+    });
+});
+
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseDeveloperExceptionPage();
 }
 
+app.UseSwagger();
+app.UseSwaggerUI();
+app.UseCors("cors");
+
+app.UseForwardedHeaders();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
@@ -66,3 +79,4 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+

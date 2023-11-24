@@ -179,6 +179,9 @@ namespace API.Controllers
                 }
                 else
                 {
+                    var result = await ValidarSuperPoderesAsync(request.Superpoderes);
+                    if (!result.Resultado) return BadRequest(result);
+
                     heroi.Update
                         (
                             request.Nome,
@@ -243,6 +246,7 @@ namespace API.Controllers
         }
 
 
+        //passar pra classes de servisos heroisuperporder
         private async Task<ResultViewModel> ValidarSuperPoderesAsync(List<int> superpoderes)
         {
             foreach (var poderId in superpoderes)
@@ -293,7 +297,5 @@ namespace API.Controllers
 
             return true;
         }
-
-        //private async Task<>
     }
 }
